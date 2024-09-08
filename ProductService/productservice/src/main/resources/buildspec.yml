@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 975050222739.dkr.ecr.ap-south-1.amazonaws.com)
+      - REPOSITORY_URI=975050222739.dkr.ecr.ap-south-1.amazonaws.com/product-service
+      - echo $REPOSITORY_URI
+  build:
+    commands:
+      - echo Build the Docker images...
+      - docker-compose -f docker-compose.yml build
+  post_build:
+    commands:
+      - echo Tagging and pushing Docker images to ECR...
+      - docker tag product-service:latest $REPOSITORY_URI:latest
+      - docker push $REPOSITORY_URI:latest
+artifacts:
+  files:
+    - '**/*'
